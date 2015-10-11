@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,17 +16,17 @@ namespace StebetTagger.Core.Id3.Tags
             switch (version)
             {
                 case TagVersion.V23:
-                    List<byte> bytes = new List<byte>();
-                    if (this.Encoding == Encoding.GetEncoding("ISO-8859-1"))
+                    var bytes = new List<byte>();
+                    if (Encoding == Encoding.GetEncoding("ISO-8859-1"))
                     {
                         bytes.Add(0x00);
                         if (!string.IsNullOrEmpty(Text))
                         {
-                            bytes.AddRange(this.Encoding.GetBytes(Text));
+                            bytes.AddRange(Encoding.GetBytes(Text));
                         }
                         bytes.Add(0x00);
                     }
-                    else if (this.Encoding == Encoding.Unicode || this.Encoding == Encoding.BigEndianUnicode)
+                    else if (Encoding == Encoding.Unicode || Encoding == Encoding.BigEndianUnicode)
                     {
                         bytes.Add(0x01);
                         if (!string.IsNullOrEmpty(Text))
@@ -63,7 +62,7 @@ namespace StebetTagger.Core.Id3.Tags
                         if (peek == 0x00)
                         {
                             peek = stream.ReadByte();
-                            this.Encoding = Encoding.GetEncoding("ISO-8859-1");
+                            Encoding = Encoding.GetEncoding("ISO-8859-1");
                             while (textEnd < tagLength && peek != 0x00)
                             {
                                 textEnd++;
@@ -76,7 +75,7 @@ namespace StebetTagger.Core.Id3.Tags
                             {
                                 byte[] textBytes = new byte[textEnd - textStart];
                                 await stream.ReadAsync(textBytes, 0, textBytes.Length);
-                                Text = this.Encoding.GetString(textBytes);
+                                Text = Encoding.GetString(textBytes);
                             }
                         }
                         else if (peek == 0x01)
@@ -93,16 +92,16 @@ namespace StebetTagger.Core.Id3.Tags
                             {
                                 if (stream.ReadByte() == 0xFF && stream.ReadByte() == 0xFE)
                                 {
-                                    this.Encoding = Encoding.Unicode;
+                                    Encoding = Encoding.Unicode;
                                 }
                                 else
                                 {
-                                    this.Encoding = Encoding.BigEndianUnicode;
+                                    Encoding = Encoding.BigEndianUnicode;
                                 }
 
                                 byte[] textBytes = new byte[textEnd - textStart];
                                 await stream.ReadAsync(textBytes, 0, textBytes.Length);
-                                Text = this.Encoding.GetString(textBytes);
+                                Text = Encoding.GetString(textBytes);
                             }
                         }
                         else
@@ -133,7 +132,7 @@ namespace StebetTagger.Core.Id3.Tags
                         switch (bytes[0])
                         {
                             case 0x00:
-                                this.Encoding = Encoding.GetEncoding("ISO-8859-1");
+                                Encoding = Encoding.GetEncoding("ISO-8859-1");
                                 while (textEnd < tagLength && bytes[textEnd] != 0x00)
                                 {
                                     textEnd++;
@@ -144,11 +143,11 @@ namespace StebetTagger.Core.Id3.Tags
                             case 0x01:
                                 if (bytes[textStart] == 0xFF && bytes[textStart + 1] == 0xFE)
                                 {
-                                    this.Encoding = Encoding.Unicode;
+                                    Encoding = Encoding.Unicode;
                                 }
                                 else
                                 {
-                                    this.Encoding = Encoding.BigEndianUnicode;
+                                    Encoding = Encoding.BigEndianUnicode;
                                 }
 
                                 while (textEnd < tagLength && (bytes[textEnd] == 0x00 && bytes[textEnd + 1] == 0x00) == false)
@@ -164,7 +163,7 @@ namespace StebetTagger.Core.Id3.Tags
 
                         if (textLength > 0)
                         {
-                            Text = this.Encoding.GetString(bytes, textStart, textLength);
+                            Text = Encoding.GetString(bytes, textStart, textLength);
                         }
                     }
                     else

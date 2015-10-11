@@ -1,13 +1,12 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3
 {
-	/// <summary>
-	/// Header that describes an ID3 Version 2.3 Frame
-	/// </summary>
-	public class Frame23Header
+    /// <summary>
+    /// Header that describes an ID3 Version 2.3 Frame
+    /// </summary>
+    public class Frame23Header
 	{
         public string Id { get; private set; }
         public int Size { get; private set; }

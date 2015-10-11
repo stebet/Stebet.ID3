@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-
-using StebetTagger.Core;
+﻿using System.IO;
 using StebetTagger.Core.Id3;
-using StebetTagger.Core.Id3.Tags;
-using System.Globalization;
 
 namespace TagCleaner
 {
@@ -20,7 +12,7 @@ namespace TagCleaner
                 string[] files = Directory.GetFiles(args[0], "*.mp3", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    MP3File mp3File = MP3File.ReadMP3File(file).Result;
+                    var mp3File = MP3File.ReadMP3FileAsync(file).Result;
 
                     /*
                     for (int i = 0; i < mp3File.Tag.Tags.Count; i++)

@@ -1,30 +1,27 @@
 using System;
-using System.Linq;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
-using StebetTagger.Core.Id3.Tags;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3
 {
-	/// <summary>
-	/// Represents a collection of ID3v2.4 frames
-	/// </summary>
-	public class Tag
+    /// <summary>
+    /// Represents a collection of ID3v2.4 frames
+    /// </summary>
+    public class Tag
     {
-        public Collection<Frame> Tags { get; private set; }
+        public IList<Frame> Frames { get; private set; }
         
         public Tag()
-		{
-            Tags = new Collection<Frame>();
-		}
+        {
+            Frames = new List<Frame>();
+        }
 
         public async Task Write(Stream stream, TagVersion version)
         {
             using (var memoryStream = new MemoryStream())
             {
-                foreach (Frame id3Frame in Tags)
+                foreach (Frame id3Frame in Frames)
                 {
                     await id3Frame.WriteAsync(memoryStream, version);
                 }
@@ -56,5 +53,5 @@ namespace StebetTagger.Core.Id3
                 await memoryStream.CopyToAsync(stream);
             }
         }
-	}
+    }
 }

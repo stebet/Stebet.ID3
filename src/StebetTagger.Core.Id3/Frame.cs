@@ -1,14 +1,13 @@
 using System;
 using System.Text;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3
 {
-	/// <summary>
-	/// Represent an abstract class for a ID3 frame
-	/// </summary>
+    /// <summary>
+    /// Represent an abstract class for a ID3 frame
+    /// </summary>
     public abstract class Frame
 	{
         protected Frame() { }

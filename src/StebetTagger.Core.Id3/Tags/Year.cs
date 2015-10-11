@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel.Composition;
 
 namespace StebetTagger.Core.Id3.Tags
 {
-    [Export("TYER", typeof(Frame))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Year : TextFrame
     {
         internal override string GetTagId(TagVersion version)
@@ -17,7 +11,7 @@ namespace StebetTagger.Core.Id3.Tags
                 case TagVersion.V23:
                     return "TYER";
                 default:
-                    throw new NotImplementedException("Frame{" + this.ToString() + "} has not been implemented for version " + version.ToString());
+                    throw new NotImplementedException("Frame{" + ToString() + "} has not been implemented for version " + version.ToString());
             }
         }
 

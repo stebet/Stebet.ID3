@@ -7,56 +7,40 @@ namespace StebetTagger.Core.Id3
 {
     public class MP3File
     {
-        public static byte[] Id3V2Identifier = new byte[] { 0x49, 0x44, 0x33 };
+        private MP3File()
+        {
+        }
+
+        public static readonly byte[] ID3V2Identifier = new byte[] { 0x49, 0x44, 0x33 };
         public int MpegStart { get; private set; }
         public int MpegEnd { get; private set; }
         public Tag Tag { get; private set; }
         public TagHeader OriginalTagHeader { get; private set; }
         public bool HasId3V2 { get; private set; }
-        public string OriginalFile { get; private set; }
+        public string OriginalFile { get; set; }
 
-        private MP3File()
+        public static async Task<MP3File> ReadMP3FileAsync(string fileName)
         {
+            using (var fileStream = File.OpenRead(fileName))
+            {
+                MP3File file = await ReadMP3FileAsync(fileStream);
+                file.OriginalFile = fileName;
+                return file;
+            }
         }
 
-        public static async Task<MP3File> ReadMP3File(string fileName)
+        public static async Task<MP3File> ReadMP3FileAsync(Stream stream)
         {
-            FileStream stream = File.OpenRead(fileName);
-            MP3File file = await ReadMP3File(stream, fileName);
-            stream.Close();
-            return file;
-        }
-
-        public static async Task<MP3File> ReadMP3File(Stream stream, string fileName)
-        {
-            MP3File file = new MP3File() { OriginalFile = fileName };
-            
+            var file = new MP3File();
             var fileHeader = new byte[3];
             await stream.ReadAsync(fileHeader, 0, fileHeader.Length);
-            file.HasId3V2 = fileHeader.SequenceEqual(Id3V2Identifier);
+            file.HasId3V2 = fileHeader.SequenceEqual(ID3V2Identifier);
             if (file.HasId3V2)
             {
+                // Let's read the tag header.
                 file.OriginalTagHeader = await TagHeader.ReadTagHeader(stream);
-                stream.Seek(file.OriginalTagHeader.TagLength + 10, SeekOrigin.Begin);
 
-                while (stream.Position < stream.Length)
-                {
-                    if (stream.ReadByte() == 0xFF)
-                    {
-                        if (stream.ReadByte() >= 0xE0)
-                        {
-                            stream.Seek(-2, SeekOrigin.Current);
-                            break;
-                        }
-                    }
-                }
-
-                // Let's find out where the MPEG frames start
-                file.MpegStart = (int)stream.Position;
-
-                // Let's start reading some tags, so let's seek to first frame and read all of the frames into an array to parse
-                stream.Seek(10, SeekOrigin.Begin);
-
+                // Let's read the tag.
                 switch (file.OriginalTagHeader.Version)
                 {
                     case TagVersion.V22:
@@ -74,22 +58,21 @@ namespace StebetTagger.Core.Id3
             else // No ID3v2 Tag so the Mpeg Frames presumably start at the beginning but let's make sure though
             {
                 stream.Seek(0, SeekOrigin.Begin);
-                bool mpegFramesStartFound = false;
-                while (!mpegFramesStartFound)
-                {
-                    if (stream.ReadByte() == 0xFF)
-                    {
-                        if (stream.ReadByte() >= 0xE0)
-                        {
-                            mpegFramesStartFound = true;
-                            stream.Seek(-2, SeekOrigin.Current);
-                        }
-                    }
-                }
-
-                // Let's find out where the MPEG frames start
-                file.MpegStart = (int)stream.Position;
             }
+
+            // Now let's find the MPEG frames, seek until we find the first 0xFF byte that
+            // should be part of the first Mpeg frame.
+            while (stream.Position < stream.Length && stream.ReadByte() != 0xFF)
+            {
+                if (stream.ReadByte() >= 0xE0)
+                {
+                    stream.Seek(-2, SeekOrigin.Current);
+                    break;
+                }
+            }
+
+            // We should be at the first MPEG frame
+            file.MpegStart = (int)stream.Position;
 
             //Let's see if this file has an ID3v1 tag
             stream.Seek(-128, SeekOrigin.End);
@@ -108,40 +91,32 @@ namespace StebetTagger.Core.Id3
             return file;
         }
 
-        public void SaveClean(string fileName)
+        public async Task SaveClean(string fileName)
         {
-            int startRead = -1;
-            int endRead = -1;
+            int startRead = MpegStart;
+            int endRead = MpegEnd;
 
-            startRead = MpegStart;
-            endRead = MpegEnd;
+            var mpegFrames = new byte[endRead - startRead];
 
-            byte[] mpegFrames = new byte[endRead - startRead];
-
-            using (FileStream file = File.OpenRead(this.OriginalFile))
+            using (var file = File.OpenRead(OriginalFile))
             {
                 file.Seek(MpegStart, SeekOrigin.Begin);
-                file.Read(mpegFrames, 0, mpegFrames.Length);
+                await file.ReadAsync(mpegFrames, 0, mpegFrames.Length);
             }
 
-            if (File.Exists(fileName))
+            using (var file = File.Open(fileName, FileMode.Truncate, FileAccess.Write))
             {
-                File.Delete(fileName);
-            }
-
-            using (var file = File.Open(fileName, FileMode.CreateNew, FileAccess.Write))
-            {
-                file.Write(mpegFrames, 0, mpegFrames.Length);
+                await file.WriteAsync(mpegFrames, 0, mpegFrames.Length);
             }
         }
 
-        public async Task SaveAs(string fileName, bool keepV1Tag, TagVersion version)
+        public async Task SaveAsAsync(string fileName, bool keepV1Tag, TagVersion version)
         {
             int startRead = -1;
             int endRead = -1;
             if (keepV1Tag)
             {
-                FileInfo fileInfo = new FileInfo(this.OriginalFile);
+                FileInfo fileInfo = new FileInfo(OriginalFile);
                 startRead = MpegStart;
                 endRead = (int)fileInfo.Length;
             }
@@ -165,7 +140,7 @@ namespace StebetTagger.Core.Id3
                 }
                 else
                 {
-                    using (var file = File.OpenRead(this.OriginalFile))
+                    using (var file = File.OpenRead(OriginalFile))
                     {
                         file.Seek(MpegStart, SeekOrigin.Begin);
                         var buffer = new byte[4096];
@@ -189,19 +164,9 @@ namespace StebetTagger.Core.Id3
             }
         }
 
-        public void Save(bool keepV1Tag, TagVersion version)
+        public Task SaveAsync(bool keepV1Tag = false, TagVersion version = TagVersion.V23)
         {
-            SaveAs(this.OriginalFile, keepV1Tag, version);
-        }
-
-        public void Save(TagVersion version)
-        {
-            SaveAs(this.OriginalFile, false, version);
-        }
-
-        public void Save()
-        {
-            SaveAs(this.OriginalFile, false, TagVersion.V23);
+            return SaveAsAsync(OriginalFile, keepV1Tag, version);
         }
     }
 }
