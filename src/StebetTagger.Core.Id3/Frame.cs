@@ -9,7 +9,7 @@ namespace StebetTagger.Core.Id3
     /// Represent an abstract class for a ID3 frame
     /// </summary>
     public abstract class Frame
-	{
+    {
         protected Frame() { }
 
         public async Task WriteAsync(Stream stream, TagVersion version)
@@ -33,27 +33,26 @@ namespace StebetTagger.Core.Id3
                     stream.WriteByte((byte)((contentBytes.Length % 128)));
                     break;
                 default:
-                    throw new ArgumentException("Unable to write frame with version = " + version.ToString(), "version");
+                    throw new ArgumentException("Unable to write frame with version = " + version.ToString(), nameof(version));
             }
             stream.WriteByte(0x00);
             stream.WriteByte(0x00);
             await stream.WriteAsync(contentBytes, 0, contentBytes.Length);
         }
 
-		/// <summary>
-		/// Returns the frame's contents as a byte array.
-		/// </summary>
-		/// <returns>The frame content as an array of bytes</returns>
-		internal abstract byte[] GetContentBytes(TagVersion version);
-		
         /// <summary>
-		/// Returns the frames string ID depending on the tag version (if applicable)
-		/// </summary>
-		/// <param name="version">The TagVersion requested</param>
-		/// <returns>A string corresponding to the Frame ID</returns>
-		internal abstract string GetTagId(TagVersion version);
+        /// Returns the frame's contents as a byte array.
+        /// </summary>
+        /// <returns>The frame content as an array of bytes</returns>
+        internal abstract byte[] GetContentBytes(TagVersion version);
+        
+        /// <summary>
+        /// Returns the frames string ID depending on the tag version (if applicable)
+        /// </summary>
+        /// <param name="version">The TagVersion requested</param>
+        /// <returns>A string corresponding to the Frame ID</returns>
+        internal abstract string GetTagId(TagVersion version);
 
-		public abstract Task FromStream(Stream stream, int tagLength, TagVersion version);
-        public abstract void FromBytes(byte[] bytes, int tagLength, TagVersion version);
-	}
+        public abstract Task FromStreamAsync(Stream stream, int tagLength, TagVersion version);
+    }
 }

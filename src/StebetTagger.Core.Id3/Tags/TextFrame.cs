@@ -48,32 +48,29 @@ namespace StebetTagger.Core.Id3.Tags
             }
         }
 
-        public override async Task FromStream(Stream stream, int tagLength, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
         {
             switch (version)
             {
                 case TagVersion.V23:
                     if (tagLength > 1)
                     {
-                        long currentPosition = stream.Position;
-                        int textStart = 1;
-                        int textEnd = textStart;
+                        long startPosition = stream.Position;
+                        int textSize = 0;
                         int peek = stream.ReadByte(); 
                         if (peek == 0x00)
                         {
-                            peek = stream.ReadByte();
                             Encoding = Encoding.GetEncoding("ISO-8859-1");
-                            while (textEnd < tagLength && peek != 0x00)
+                            while (textSize < tagLength && stream.ReadByte() != 0x00)
                             {
-                                textEnd++;
-                                peek = stream.ReadByte();
+                                textSize++;
                             }
 
-                            stream.Seek(-(stream.Position - currentPosition) + 1, SeekOrigin.Current);
+                            stream.Seek(startPosition + 1, SeekOrigin.Begin);
 
-                            if (textEnd - textStart > 0)
+                            if (textSize > 1)
                             {
-                                byte[] textBytes = new byte[textEnd - textStart];
+                                byte[] textBytes = new byte[textSize - 1];
                                 await stream.ReadAsync(textBytes, 0, textBytes.Length);
                                 Text = Encoding.GetString(textBytes);
                             }
@@ -81,14 +78,14 @@ namespace StebetTagger.Core.Id3.Tags
                         else if (peek == 0x01)
                         {
                             int nextPeek = stream.ReadByte();
-                            while (textEnd < tagLength && (peek == 0x00 && nextPeek == 0x00) == false)
+                            while (textSize < tagLength && (peek == 0x00 && nextPeek == 0x00) == false)
                             {
-                                textEnd += 2;
+                                textSize += 2;
                             }
 
-                            stream.Seek(-(stream.Position - currentPosition), SeekOrigin.Current);
+                            stream.Seek(-(stream.Position - startPosition), SeekOrigin.Current);
 
-                            if (textEnd - textStart > 0)
+                            if (textSize > 0)
                             {
                                 if (stream.ReadByte() == 0xFF && stream.ReadByte() == 0xFE)
                                 {
@@ -99,7 +96,7 @@ namespace StebetTagger.Core.Id3.Tags
                                     Encoding = Encoding.BigEndianUnicode;
                                 }
 
-                                byte[] textBytes = new byte[textEnd - textStart];
+                                byte[] textBytes = new byte[textSize];
                                 await stream.ReadAsync(textBytes, 0, textBytes.Length);
                                 Text = Encoding.GetString(textBytes);
                             }
@@ -119,66 +116,6 @@ namespace StebetTagger.Core.Id3.Tags
             }
         }
 
-        public override void FromBytes(byte[] bytes, int tagLength, TagVersion version)
-        {
-            switch (version)
-            {
-                case TagVersion.V23:
-                    if (tagLength > 1)
-                    {
-                        int textStart = 1;
-                        int textEnd = 1;
-                        int textLength = 0;
-                        switch (bytes[0])
-                        {
-                            case 0x00:
-                                Encoding = Encoding.GetEncoding("ISO-8859-1");
-                                while (textEnd < tagLength && bytes[textEnd] != 0x00)
-                                {
-                                    textEnd++;
-                                }
-
-                                textLength = textEnd - textStart;
-                                break;
-                            case 0x01:
-                                if (bytes[textStart] == 0xFF && bytes[textStart + 1] == 0xFE)
-                                {
-                                    Encoding = Encoding.Unicode;
-                                }
-                                else
-                                {
-                                    Encoding = Encoding.BigEndianUnicode;
-                                }
-
-                                while (textEnd < tagLength && (bytes[textEnd] == 0x00 && bytes[textEnd + 1] == 0x00) == false)
-                                {
-                                    textEnd += 2;
-                                }
-
-                                textLength = textEnd - textStart;
-                                break;
-                            default:
-                                throw new ArgumentException("frame does not contain valid text data!", "frame");
-                        }
-
-                        if (textLength > 0)
-                        {
-                            Text = Encoding.GetString(bytes, textStart, textLength);
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("frame does not contain valid text data!", "frame");
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException("Reading " + version.ToString() + " has not been implemented!");
-            }
-        }
-
-        public override string ToString()
-        {
-            return Text;
-        }
+        public override string ToString() => Text;
     }
 }

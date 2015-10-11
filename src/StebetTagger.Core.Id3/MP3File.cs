@@ -11,7 +11,6 @@ namespace StebetTagger.Core.Id3
         {
         }
 
-        public static readonly byte[] ID3V2Identifier = new byte[] { 0x49, 0x44, 0x33 };
         public int MpegStart { get; private set; }
         public int MpegEnd { get; private set; }
         public Tag Tag { get; private set; }
@@ -34,7 +33,7 @@ namespace StebetTagger.Core.Id3
             var file = new MP3File();
             var fileHeader = new byte[3];
             await stream.ReadAsync(fileHeader, 0, fileHeader.Length);
-            file.HasId3V2 = fileHeader.SequenceEqual(ID3V2Identifier);
+            file.HasId3V2 = fileHeader.SequenceEqual(Constants.ID3Header);
             if (file.HasId3V2)
             {
                 // Let's read the tag header.
@@ -164,9 +163,6 @@ namespace StebetTagger.Core.Id3
             }
         }
 
-        public Task SaveAsync(bool keepV1Tag = false, TagVersion version = TagVersion.V23)
-        {
-            return SaveAsAsync(OriginalFile, keepV1Tag, version);
-        }
+        public Task SaveAsync(bool keepV1Tag = false, TagVersion version = TagVersion.V23) => SaveAsAsync(OriginalFile, keepV1Tag, version);
     }
 }

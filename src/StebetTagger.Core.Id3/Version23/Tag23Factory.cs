@@ -12,28 +12,22 @@ namespace StebetTagger.Core.Id3
     {
         public static async Task<Tag> FromStream(Stream stream, int tagLength)
         {
-            Tag newTag = new Tag();
-            int peek = stream.ReadByte();
-            while (stream.Position < tagLength && peek != 0x00)
+            var newTag = new Tag();
+            while (stream.Position < tagLength)
             {
-                stream.Seek(-1, SeekOrigin.Current);
                 Frame23Header frameHeader = await Frame23Header.FromStream(stream);
 
                 Frame tag = GetFrame(frameHeader.Id);
                 if (tag != null)
                 {
-                    var frameBytes = new byte[frameHeader.Size];
-                    await stream.ReadAsync(frameBytes, 0, frameBytes.Length);
-                    tag.FromBytes(frameBytes, frameHeader.Size, TagVersion.V23);
+                    await tag.FromStreamAsync(stream, frameHeader.Size, TagVersion.V23);
                     newTag.Frames.Add(tag);
                 }
                 else
                 {
-                    Debug.WriteLine("Unable to read {0} tag. Skipping it.", frameHeader.Id);
+                    Debug.WriteLine($"Unable to read {frameHeader.Id} tag. Skipping it.");
                     stream.Seek(frameHeader.Size, SeekOrigin.Current);
                 }
-
-                peek = stream.ReadByte();
             }
 
             return newTag;

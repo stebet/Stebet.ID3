@@ -10,8 +10,8 @@ namespace StebetTagger.Core.Id3
     /// </summary>
     public class Tag
     {
-        public IList<Frame> Frames { get; private set; }
-        
+        public IList<Frame> Frames { get; }
+
         public Tag()
         {
             Frames = new List<Frame>();
@@ -26,7 +26,7 @@ namespace StebetTagger.Core.Id3
                     await id3Frame.WriteAsync(memoryStream, version);
                 }
 
-                await stream.WriteAsync(Constants.ID3HeaderBytes, 0, Constants.ID3HeaderBytes.Length);
+                await stream.WriteAsync(Constants.ID3Header, 0, Constants.ID3Header.Length);
                 switch (version)
                 {
                     case TagVersion.V22:
@@ -39,7 +39,7 @@ namespace StebetTagger.Core.Id3
                         stream.WriteByte(0x04);
                         break;
                     default:
-                        throw new ArgumentException("Unable to write ID3 Tag with version = " + version.ToString(), "version");
+                        throw new ArgumentException("Unable to write ID3 Tag with version = " + version.ToString(), nameof(version));
                 }
                 stream.WriteByte(0x00);
                 stream.WriteByte(0x00);
