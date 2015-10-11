@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StebetTagger.Core", "StebetTagger.Core\StebetTagger.Core.csproj", "{393123C5-EC3B-447D-8B63-EA5FF2B0F0DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StebetTagger.Core.Id3", "StebetTagger.Core.Id3\StebetTagger.Core.Id3.csproj", "{4F79D8BC-D4E7-4AB4-913C-5BE2E3F9B49A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TagCleaner", "TagCleaner\TagCleaner.csproj", "{749A97ED-0842-45D5-BD36-040FBDCB5EC1}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 4
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://stebet.visualstudio.com/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = StebetTagger.Core.Id3\\StebetTagger.Core.Id3.csproj
+		SccProjectName1 = StebetTagger.Core.Id3
+		SccLocalPath1 = StebetTagger.Core.Id3
+		SccProjectUniqueName2 = StebetTagger.Core\\StebetTagger.Core.csproj
+		SccProjectName2 = StebetTagger.Core
+		SccLocalPath2 = StebetTagger.Core
+		SccProjectUniqueName3 = TagCleaner\\TagCleaner.csproj
+		SccProjectName3 = TagCleaner
+		SccLocalPath3 = TagCleaner
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{393123C5-EC3B-447D-8B63-EA5FF2B0F0DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{393123C5-EC3B-447D-8B63-EA5FF2B0F0DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{393123C5-EC3B-447D-8B63-EA5FF2B0F0DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{393123C5-EC3B-447D-8B63-EA5FF2B0F0DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F79D8BC-D4E7-4AB4-913C-5BE2E3F9B49A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F79D8BC-D4E7-4AB4-913C-5BE2E3F9B49A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F79D8BC-D4E7-4AB4-913C-5BE2E3F9B49A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F79D8BC-D4E7-4AB4-913C-5BE2E3F9B49A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{749A97ED-0842-45D5-BD36-040FBDCB5EC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{749A97ED-0842-45D5-BD36-040FBDCB5EC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{749A97ED-0842-45D5-BD36-040FBDCB5EC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{749A97ED-0842-45D5-BD36-040FBDCB5EC1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
