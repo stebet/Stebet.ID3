@@ -13,14 +13,15 @@ namespace StebetTagger.Core.Id3
         public static async Task<Tag> FromStream(Stream stream, int tagLength)
         {
             var newTag = new Tag();
-            while (stream.Position < tagLength)
+            while (stream.Position < tagLength && stream.ReadByte() != 0x00)
             {
-                Frame23Header frameHeader = await Frame23Header.FromStream(stream);
+                stream.Seek(-1, SeekOrigin.Current);
+                Frame23Header frameHeader = await Frame23Header.FromStream(stream).ConfigureAwait(false);
 
                 Frame tag = GetFrame(frameHeader.Id);
                 if (tag != null)
                 {
-                    await tag.FromStreamAsync(stream, frameHeader.Size, TagVersion.V23);
+                    await tag.FromStreamAsync(stream, frameHeader.Size, TagVersion.V23).ConfigureAwait(false);
                     newTag.Frames.Add(tag);
                 }
                 else

@@ -17,7 +17,7 @@ namespace StebetTagger.Core.Id3
             byte[] contentBytes = GetContentBytes(version);
             
             var tagId = Encoding.Default.GetBytes(GetTagId(version)); 
-            await stream.WriteAsync(tagId, 0, tagId.Length);
+            await stream.WriteAsync(tagId, 0, tagId.Length).ConfigureAwait(false);
             switch (version)
             {
                 case TagVersion.V23:
@@ -37,7 +37,7 @@ namespace StebetTagger.Core.Id3
             }
             stream.WriteByte(0x00);
             stream.WriteByte(0x00);
-            await stream.WriteAsync(contentBytes, 0, contentBytes.Length);
+            await stream.WriteAsync(contentBytes, 0, contentBytes.Length).ConfigureAwait(false);
         }
 
         /// <summary>

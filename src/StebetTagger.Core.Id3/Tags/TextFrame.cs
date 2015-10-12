@@ -56,22 +56,23 @@ namespace StebetTagger.Core.Id3.Tags
                     if (tagLength > 1)
                     {
                         long startPosition = stream.Position;
-                        int textSize = 0;
+                        long textSize = 0;
                         int peek = stream.ReadByte(); 
                         if (peek == 0x00)
                         {
                             Encoding = Encoding.GetEncoding("ISO-8859-1");
-                            while (textSize < tagLength && stream.ReadByte() != 0x00)
+                            while (stream.ReadByte() != 0x00 && (stream.Position - startPosition) < tagLength)
                             {
-                                textSize++;
                             }
+
+                            textSize = (stream.Position) - (startPosition + 1);
 
                             stream.Seek(startPosition + 1, SeekOrigin.Begin);
 
-                            if (textSize > 1)
+                            if (textSize > 0)
                             {
-                                byte[] textBytes = new byte[textSize - 1];
-                                await stream.ReadAsync(textBytes, 0, textBytes.Length);
+                                byte[] textBytes = new byte[textSize];
+                                await stream.ReadAsync(textBytes, 0, textBytes.Length).ConfigureAwait(false);
                                 Text = Encoding.GetString(textBytes);
                             }
                         }
@@ -97,7 +98,7 @@ namespace StebetTagger.Core.Id3.Tags
                                 }
 
                                 byte[] textBytes = new byte[textSize];
-                                await stream.ReadAsync(textBytes, 0, textBytes.Length);
+                                await stream.ReadAsync(textBytes, 0, textBytes.Length).ConfigureAwait(false);
                                 Text = Encoding.GetString(textBytes);
                             }
                         }

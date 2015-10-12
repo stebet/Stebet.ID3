@@ -22,7 +22,7 @@ namespace StebetTagger.Core.Id3
         {
             using (var fileStream = File.OpenRead(fileName))
             {
-                MP3File file = await ReadMP3FileAsync(fileStream);
+                MP3File file = await ReadMP3FileAsync(fileStream).ConfigureAwait(false);
                 file.OriginalFile = fileName;
                 return file;
             }
@@ -32,12 +32,12 @@ namespace StebetTagger.Core.Id3
         {
             var file = new MP3File();
             var fileHeader = new byte[3];
-            await stream.ReadAsync(fileHeader, 0, fileHeader.Length);
+            await stream.ReadAsync(fileHeader, 0, fileHeader.Length).ConfigureAwait(false);
             file.HasId3V2 = fileHeader.SequenceEqual(Constants.ID3Header);
             if (file.HasId3V2)
             {
                 // Let's read the tag header.
-                file.OriginalTagHeader = await TagHeader.ReadTagHeader(stream);
+                file.OriginalTagHeader = await TagHeader.ReadTagHeader(stream).ConfigureAwait(false);
 
                 // Let's read the tag.
                 switch (file.OriginalTagHeader.Version)
@@ -45,7 +45,7 @@ namespace StebetTagger.Core.Id3
                     case TagVersion.V22:
                         break;
                     case TagVersion.V23:
-                        file.Tag = await Tag23Factory.FromStream(stream, file.OriginalTagHeader.TagLength);
+                        file.Tag = await Tag23Factory.FromStream(stream, file.OriginalTagHeader.TagLength).ConfigureAwait(false);
                         break;
                     case TagVersion.V24:
                         //Tag = Tag24Factory.FromBytes(tagBytes);
@@ -100,12 +100,12 @@ namespace StebetTagger.Core.Id3
             using (var file = File.OpenRead(OriginalFile))
             {
                 file.Seek(MpegStart, SeekOrigin.Begin);
-                await file.ReadAsync(mpegFrames, 0, mpegFrames.Length);
+                await file.ReadAsync(mpegFrames, 0, mpegFrames.Length).ConfigureAwait(false);
             }
 
             using (var file = File.Open(fileName, FileMode.Truncate, FileAccess.Write))
             {
-                await file.WriteAsync(mpegFrames, 0, mpegFrames.Length);
+                await file.WriteAsync(mpegFrames, 0, mpegFrames.Length).ConfigureAwait(false);
             }
         }
 
@@ -127,14 +127,14 @@ namespace StebetTagger.Core.Id3
 
             using (var memoryStream = new MemoryStream())
             {
-                await Tag.Write(memoryStream, version);
+                await Tag.Write(memoryStream, version).ConfigureAwait(false);
 
                 if (memoryStream.Length <= MpegStart && MpegEnd == endRead)
                 {
                     //we can write the new Tags to the old Tagspace, which is much quicker
                     using (var file = File.Open(fileName, FileMode.Open, FileAccess.Write))
                     {
-                        await memoryStream.CopyToAsync(file);
+                        await memoryStream.CopyToAsync(file).ConfigureAwait(false);
                     }
                 }
                 else
@@ -145,8 +145,8 @@ namespace StebetTagger.Core.Id3
                         var buffer = new byte[4096];
                         while(file.Position < MpegEnd)
                         {
-                            int bytesRead = await file.ReadAsync(buffer, 0, (int)Math.Min(MpegEnd - file.Position, buffer.Length));
-                            await memoryStream.WriteAsync(buffer, 0, bytesRead);
+                            int bytesRead = await file.ReadAsync(buffer, 0, (int)Math.Min(MpegEnd - file.Position, buffer.Length)).ConfigureAwait(false);
+                            await memoryStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);
                         }
                     }
 
@@ -157,7 +157,7 @@ namespace StebetTagger.Core.Id3
 
                     using (var file = File.Open(fileName, FileMode.CreateNew, FileAccess.Write))
                     {
-                        await memoryStream.CopyToAsync(file);
+                        await memoryStream.CopyToAsync(file).ConfigureAwait(false);
                     }
                 }
             }

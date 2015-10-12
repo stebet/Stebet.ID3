@@ -23,10 +23,10 @@ namespace StebetTagger.Core.Id3
             {
                 foreach (Frame id3Frame in Frames)
                 {
-                    await id3Frame.WriteAsync(memoryStream, version);
+                    await id3Frame.WriteAsync(memoryStream, version).ConfigureAwait(false);
                 }
 
-                await stream.WriteAsync(Constants.ID3Header, 0, Constants.ID3Header.Length);
+                await stream.WriteAsync(Constants.ID3Header, 0, Constants.ID3Header.Length).ConfigureAwait(false);
                 switch (version)
                 {
                     case TagVersion.V22:
@@ -50,7 +50,7 @@ namespace StebetTagger.Core.Id3
                 stream.WriteByte((byte)((size % (128 * 128)) / 128));
                 stream.WriteByte((byte)(size % 128));
 
-                await memoryStream.CopyToAsync(stream);
+                await memoryStream.CopyToAsync(stream).ConfigureAwait(false);
             }
         }
     }

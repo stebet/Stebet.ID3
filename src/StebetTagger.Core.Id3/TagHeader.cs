@@ -21,7 +21,7 @@ namespace StebetTagger.Core.Id3
         {
             var header = new TagHeader();
             byte[] headerBytes = new byte[7];
-            await stream.ReadAsync(headerBytes, 0, headerBytes.Length);
+            await stream.ReadAsync(headerBytes, 0, headerBytes.Length).ConfigureAwait(false);
 
             switch (Convert.ToInt32(headerBytes[0]))
             {
@@ -43,7 +43,7 @@ namespace StebetTagger.Core.Id3
             header.ExtendedHeader = ((headerBytes[2] & 0x40) == 0x40);
             header.Experimental = ((headerBytes[2] & 0x20) == 0x20);
             header.HasFooter = ((headerBytes[2] & 0x10) == 0x10);
-            header.TagLength = (int)headerBytes[3] * 128 * 128 * 128 + (int)headerBytes[4] * 128 * 128 + (int)headerBytes[5] * 128 + (int)headerBytes[6];
+            header.TagLength = headerBytes[3] * 128 * 128 * 128 + headerBytes[4] * 128 * 128 + headerBytes[5] * 128 + headerBytes[6];
 
             return header;
         }
