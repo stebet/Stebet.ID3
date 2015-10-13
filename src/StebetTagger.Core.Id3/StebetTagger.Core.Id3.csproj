@@ -119,6 +119,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamExtensions.cs" />
     <Compile Include="Tag.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -128,7 +129,7 @@
     <Compile Include="Tags\Album.cs" />
     <Compile Include="Tags\AlbumArtist.cs" />
     <Compile Include="Tags\Artist.cs" />
-    <None Include="Tags\AttachedPicture.cs" />
+    <Compile Include="Tags\AttachedPicture.cs" />
     <Compile Include="Tags\Composer.cs" />
     <Compile Include="Tags\ContentType.cs" />
     <Compile Include="Tags\TextFrame.cs" />

@@ -55,6 +55,8 @@ namespace StebetTagger.Core.Id3
                     return new TrackNumber();
                 case "TYER":
                     return new Year();
+                case "APIC":
+                    return new AttachedPicture();
                 default:
                     return null;
             }

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
-using System.ComponentModel.Composition;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3.Tags
 {
-    [Export(typeof(Frame))]
     public class AttachedPicture : Frame
     {
         public AttachedPictureType PictureType { get; set; }
@@ -18,11 +18,6 @@ namespace StebetTagger.Core.Id3.Tags
         {
             get { return _data; }
             set { _data = value; }
-        }
-
-        public AttachedPicture(byte[] frame, TagVersion version)
-        {
-            this.ReadBytes(frame, version);
         }
 
         public AttachedPicture()
@@ -59,69 +54,34 @@ namespace StebetTagger.Core.Id3.Tags
             }
         }
 
-        public override void ReadBytes(byte[] frame, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
         {
+            long streamStart = stream.Position;
+            int encoding = stream.ReadByte();
             switch (version)
             {
                 case TagVersion.V24:
                 case TagVersion.V23:
-                    if (frame[0] == 0x00)
+                    if (encoding == 0x00)
                     {
-                        int endMimeType = 1;
-                        while (endMimeType < frame.Length && frame[endMimeType] != 0x00)
-                        {
-                            endMimeType++;
-                        }
-                        PictureType = (AttachedPictureType)frame[endMimeType + 1];
+                        MimeType = await stream.ReadAnsiStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        PictureType = (AttachedPictureType)stream.ReadByte();
 
-                        int endDescription = endMimeType + 2;
-                        while (endDescription < frame.Length && frame[endDescription] != 0x00)
-                        {
-                            endDescription++;
-                        }
-
-                        MimeType = System.Text.Encoding.Default.GetString(frame, 1, endMimeType - 1);
-                        if (endDescription > (endMimeType + 2))
-                        {
-                            Description = System.Text.Encoding.Default.GetString(frame, endMimeType + 2, endDescription - 1);
-                        }
-                        Data = new byte[frame.Length - (endDescription + 1)];
-                        Array.Copy(frame, endDescription + 1, Data, 0, Data.Length);
+                        Description = await stream.ReadAnsiStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        Data = new byte[tagLength - (stream.Position - streamStart)];
+                        await stream.ReadAsync(Data, 0, Data.Length);
                     }
-                    else if (frame[0] == 0x01)
+                    else if (encoding == 0x01)
                     {
-                        int endMimeType = 1;
-                        while (endMimeType < frame.Length && frame[endMimeType] != 0x00)
-                        {
-                            endMimeType++;
-                        }
-                        PictureType = (AttachedPictureType)frame[endMimeType + 1];
-
-                        int endDescription = endMimeType + 2;
-                        while (endDescription < frame.Length && !(frame[endDescription] == 0x00 && frame[endDescription + 1] == 0x00))
-                        {
-                            endDescription+=2;
-                        }
-
-                        MimeType = System.Text.Encoding.Default.GetString(frame, 1, endMimeType - 1);
-
-                        if (endDescription > (endMimeType + 2))
-                        {
-                            if (frame[endMimeType + 2] == 0xFF && frame[endMimeType + 3] == 0xFE)
-                            {
-                                Description = System.Text.Encoding.Unicode.GetString(frame, endMimeType + 4, endDescription - 2);
-                            }
-                            else
-                            {
-                                Description = System.Text.Encoding.BigEndianUnicode.GetString(frame, endMimeType + 4, endDescription - 2);
-                            }
-                        }
-                        Data = new byte[frame.Length - (endDescription + 2)];
-                        Array.Copy(frame, endDescription + 2, Data, 0, Data.Length);
+                        MimeType = await stream.ReadAnsiStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        PictureType = (AttachedPictureType)stream.ReadByte();
+                        Description = await stream.ReadUnicodeStringAsync(streamStart + tagLength);
+                        Data = new byte[tagLength - (stream.Position - streamStart)];
+                        await stream.ReadAsync(Data, 0, Data.Length);
                     }
                     break;
                 default:
-                    Debug.WriteLine("TXXX: Version not implemented - " + version.ToString());
+                    Debug.WriteLine("APIC: Version not implemented - " + version.ToString());
                     break;
             }
         }
