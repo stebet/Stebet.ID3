@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3.Tags
 {
-    [Export(typeof(Frame))]
     public class UnsynchronizedLyrics : Frame
     {
         public string Language { get; set; }
@@ -20,21 +20,21 @@ namespace StebetTagger.Core.Id3.Tags
             {
                 case TagVersion.V23:
                     bytes.Add(0x00);
-                    bytes.AddRange(Helpers.GetBytesFromString("eng"));
+                    bytes.AddRange(Encoding.Default.GetBytes("eng"));
                     if (!string.IsNullOrEmpty(Description))
                     {
-                        bytes.AddRange(Helpers.GetBytesFromString(Description));
+                        bytes.AddRange(Encoding.Default.GetBytes(Description));
                     }
                     bytes.Add(0x00);
                     if (!string.IsNullOrEmpty(Text))
                     {
-                        bytes.AddRange(Helpers.GetBytesFromString(Text));
+                        bytes.AddRange(Encoding.Default.GetBytes(Text));
                     }
                     bytes.Add(0x00);
                     break;
                 case TagVersion.V24:
                 default:
-                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", "version");
+                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", nameof(version));
             }
             return bytes.ToArray();
         }
@@ -47,53 +47,34 @@ namespace StebetTagger.Core.Id3.Tags
                     return "USLT";
                 case TagVersion.V24:
                 default:
-                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", "version");
+                    throw new ArgumentException($"Version {version} is not supported for this frame!", nameof(version));
             }
         }
 
-        public override void ReadBytes(byte[] frame, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
         {
-            if (frame.Length > 6)
+            if (tagLength > 6)
             {
-                Language = Convert.ToChar(frame[1]).ToString() + Convert.ToChar(frame[2]).ToString() + Convert.ToChar(frame[3]).ToString();
-                int descriptionStart = 4;
-                int descriptionEnd = descriptionStart;
-                int textStart = 0;
-                int textEnd = 0;
-                switch (frame[0])
+                long streamStart = stream.Position;
+                int encoding = stream.ReadByte();
+                var languageBytes = new byte[3];
+                await stream.ReadAsync(languageBytes, 0, languageBytes.Length).ConfigureAwait(false);
+                Language = Encoding.Default.GetString(languageBytes);
+                switch (encoding)
                 {
                     case 0x00:
-                        while(frame[descriptionEnd] != 0x00)
-                        {
-                            descriptionEnd++;
-                        }
-                        textStart = descriptionEnd + 1;
-                        textEnd = textStart;
-                        while (frame[textEnd] != 0x00 && textEnd < (frame.Length - 1))
-                        {
-                            textEnd++;
-                        }
-                        if (descriptionEnd - descriptionStart > 0)
-                        {
-                            Description = Helpers.GetStringFromBytes(frame, descriptionStart, descriptionEnd - descriptionStart);
-                        }
-                        if (textEnd - textStart > 0)
-                        {
-                            Text = Helpers.GetStringFromBytes(frame, textStart, textEnd - textStart);
-                        }
+                        Description = stream.ReadAnsiString(streamStart + tagLength);
+                        Text = stream.ReadAnsiString(streamStart + tagLength);
                         break;
                     case 0x01:
+                        Description = await stream.ReadUnicodeStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        Text = await stream.ReadUnicodeStringAsync(streamStart + tagLength).ConfigureAwait(false);
                         break;
                     default:
-                        throw new ArgumentException("Frame has an invalid encoding marker", "frame");
+                        throw new ArgumentException("Frame has an invalid encoding marker", nameof(stream));
                 }
             }
-        }
-
-        public UnsynchronizedLyrics(byte[] content, TagVersion version)
-        {
-            ReadBytes(content, version);
-        }
+        }        
 
         public UnsynchronizedLyrics()
         {

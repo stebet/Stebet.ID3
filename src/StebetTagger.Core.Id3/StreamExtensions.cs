@@ -9,26 +9,24 @@ namespace StebetTagger.Core.Id3
 {
     public static class StreamExtensions
     {
-        public static async Task<string> ReadAnsiStringAsync(this Stream stream, long limit)
+        public static string ReadAnsiString(this Stream stream, long limit)
         {
+            var byteList = new List<byte>();
             long streamStart = stream.Position;
-            while (stream.Position < limit && stream.ReadByte() != 0x00)
+            while (stream.Position < limit)
             {
+                var lastByte = stream.ReadByte();
+                if(lastByte != 0x00)
+                {
+                    byteList.Add((byte)lastByte);
+                }
+                else
+                { 
+                    break;
+                }
             }
-            stream.Seek(-1, SeekOrigin.Current);
-            try
-            {
-                var stringBytes = new byte[stream.Position - streamStart];
-                stream.Seek(streamStart, SeekOrigin.Begin);
-                await stream.ReadAsync(stringBytes, 0, stringBytes.Length).ConfigureAwait(false);
-                stream.ReadByte();
-                return Encoding.Default.GetString(stringBytes);
-            }
-            catch (Exception ex)
-            {
-                string test = "";
-                throw;
-            }
+
+            return Encoding.Default.GetString(byteList.ToArray());
         }
 
         public static async Task<string> ReadUnicodeStringAsync(this Stream stream, long limit)

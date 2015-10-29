@@ -23,17 +23,17 @@ namespace StebetTagger.Core.Id3
         {
         }
 
-        public static async Task<Frame23Header> FromStream(Stream stream)
+        public static Frame23Header FromStream(Stream stream)
         {
             var frameHeader = new byte[10];
-            await stream.ReadAsync(frameHeader, 0, frameHeader.Length).ConfigureAwait(false);
+            stream.Read(frameHeader, 0, frameHeader.Length);
             var header = new Frame23Header();
 
             header.Id = Encoding.Default.GetString(frameHeader, 0, 4);
             header.Size = frameHeader[4] * 256 * 256 * 256 + frameHeader[5] * 256 * 256 + frameHeader[6] * 256 + frameHeader[7];
             header.TagAlterPreservation = ((frameHeader[8] & 0x80) == 0x80);
             header.FileAlterPreservation = ((frameHeader[8] & 0x40) == 0x40);
-            header.ReadOnly = ((frameHeader[8] & 0x10) == 0x20);
+            header.ReadOnly = ((frameHeader[8] & 0x10) == 0x10);
             header.Compression = ((frameHeader[9] & 0x80) == 0x80);
             header.Encryption = ((frameHeader[9] & 0x40) == 0x40);
             header.GroupingIdentity = ((frameHeader[9] & 0x20) == 0x20);

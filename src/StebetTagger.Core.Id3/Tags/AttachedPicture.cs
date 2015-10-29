@@ -50,7 +50,7 @@ namespace StebetTagger.Core.Id3.Tags
                 case TagVersion.V24:
                     return "APIC";
                 default:
-                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", "version");
+                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", nameof(version));
             }
         }
 
@@ -64,20 +64,20 @@ namespace StebetTagger.Core.Id3.Tags
                 case TagVersion.V23:
                     if (encoding == 0x00)
                     {
-                        MimeType = await stream.ReadAnsiStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        MimeType = stream.ReadAnsiString(streamStart + tagLength);
                         PictureType = (AttachedPictureType)stream.ReadByte();
 
-                        Description = await stream.ReadAnsiStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        Description = stream.ReadAnsiString(streamStart + tagLength);
                         Data = new byte[tagLength - (stream.Position - streamStart)];
-                        await stream.ReadAsync(Data, 0, Data.Length);
+                        await stream.ReadAsync(Data, 0, Data.Length).ConfigureAwait(false);
                     }
                     else if (encoding == 0x01)
                     {
-                        MimeType = await stream.ReadAnsiStringAsync(streamStart + tagLength).ConfigureAwait(false);
+                        MimeType = stream.ReadAnsiString(streamStart + tagLength);
                         PictureType = (AttachedPictureType)stream.ReadByte();
-                        Description = await stream.ReadUnicodeStringAsync(streamStart + tagLength);
+                        Description = await stream.ReadUnicodeStringAsync(streamStart + tagLength).ConfigureAwait(false);
                         Data = new byte[tagLength - (stream.Position - streamStart)];
-                        await stream.ReadAsync(Data, 0, Data.Length);
+                        await stream.ReadAsync(Data, 0, Data.Length).ConfigureAwait(false);
                     }
                     break;
                 default:

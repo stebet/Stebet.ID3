@@ -16,7 +16,7 @@ namespace StebetTagger.Core.Id3
             while (stream.Position < tagLength && stream.ReadByte() != 0x00)
             {
                 stream.Seek(-1, SeekOrigin.Current);
-                Frame23Header frameHeader = await Frame23Header.FromStream(stream).ConfigureAwait(false);
+                Frame23Header frameHeader = Frame23Header.FromStream(stream);
 
                 Frame tag = GetFrame(frameHeader.Id);
                 if (tag != null)
@@ -57,6 +57,36 @@ namespace StebetTagger.Core.Id3
                     return new Year();
                 case "APIC":
                     return new AttachedPicture();
+                case "USLT":
+                    return new UnsynchronizedLyrics();
+                case "TXXX":
+                    return new UserDefinedText();
+                case "TIT3":
+                    return new Subtitle();
+                case "TENC":
+                    return new EncodedBy();
+                case "TORY":
+                    return new OriginalYear();
+                case "TPUB":
+                    return new Publisher();
+                case "TPOS":
+                    return new PartOfSet();
+                case "TOWN":
+                    return new Owner();
+                case "PRIV":
+                    return new Private();
+                case "TOFN":
+                    return new OriginalFilename();
+                case "TSRC":
+                    return new InternationalStandardRecordingCode();
+                case "TCOP":
+                    return new Copyright();
+                case "TDAT":
+                    return new Date();
+                case "TMED":
+                    return new MediaType();
+                case "UFID":
+                    return new UniqueFileIdentifier();
                 default:
                     return null;
             }

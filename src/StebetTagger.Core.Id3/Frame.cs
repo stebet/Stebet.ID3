@@ -33,7 +33,7 @@ namespace StebetTagger.Core.Id3
                     stream.WriteByte((byte)((contentBytes.Length % 128)));
                     break;
                 default:
-                    throw new ArgumentException("Unable to write frame with version = " + version.ToString(), nameof(version));
+                    throw new ArgumentException($"Unable to write frame with version {version}", nameof(version));
             }
             stream.WriteByte(0x00);
             stream.WriteByte(0x00);

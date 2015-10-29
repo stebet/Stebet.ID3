@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3.Tags
 {
-    [Export(typeof(Frame))]
+    [DebuggerDisplay("{OwnerIdentifier} : byte[{Identifier.Length}]")]
     public class UniqueFileIdentifier : Frame
     {
         public string OwnerIdentifier { get; set; }
@@ -18,51 +20,32 @@ namespace StebetTagger.Core.Id3.Tags
             switch (version)
             {
                 case TagVersion.V23:
-                    bytes.AddRange(Helpers.GetBytesFromString(OwnerIdentifier));
+                    bytes.AddRange(Encoding.Default.GetBytes(OwnerIdentifier));
                     bytes.Add(0x00);
                     bytes.AddRange(Identifier);
                     break;
                 case TagVersion.V24:
                 default:
-                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", "version");
+                    throw new ArgumentException("Version " + version.ToString() + " is not supported for this frame!", nameof(version));
             }
             return bytes.ToArray();
         }
 
-        internal override string GetTagId(TagVersion version)
-        {
-            return "UFID";
-        }
+        internal override string GetTagId(TagVersion version) => "UFID";
 
-        public override void ReadBytes(byte[] frame, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
         {
-            if (frame.Length > 3)
+            if (tagLength > 3)
             {
-                int terminator = 0;
-                for (int i = 0; i < frame.Length; i++)
-                {
-                    if (frame[i] != 0x00)
-                    {
-                        terminator++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                this.OwnerIdentifier = Helpers.GetStringFromBytes(frame, 0, terminator);
-                this.Identifier = new byte[frame.Length - (terminator + 1)];
-                Array.Copy(frame, terminator + 1, this.Identifier, 0, this.Identifier.Length);
+                long streamStart = stream.Position;
+                OwnerIdentifier = stream.ReadAnsiString(streamStart + tagLength);
+                Identifier = new byte[tagLength - (stream.Position - streamStart)];
+                await stream.ReadAsync(Identifier, 0, Identifier.Length).ConfigureAwait(false);
             }
             else
             {
                 throw new ArgumentException("Frame has an invalid length", "frame");
             }
-        }
-
-        public UniqueFileIdentifier(byte[] content, TagVersion version)
-        {
-            ReadBytes(content, version);
         }
     }
 }

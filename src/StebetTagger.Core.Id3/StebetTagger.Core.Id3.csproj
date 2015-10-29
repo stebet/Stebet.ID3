@@ -132,12 +132,24 @@
     <Compile Include="Tags\AttachedPicture.cs" />
     <Compile Include="Tags\Composer.cs" />
     <Compile Include="Tags\ContentType.cs" />
+    <Compile Include="Tags\Copyright.cs" />
+    <Compile Include="Tags\Date.cs" />
+    <Compile Include="Tags\EncodedBy.cs" />
+    <Compile Include="Tags\InternationalStandardRecordingCode.cs" />
+    <Compile Include="Tags\MediaType.cs" />
+    <Compile Include="Tags\OriginalFilename.cs" />
+    <Compile Include="Tags\OriginalYear.cs" />
+    <Compile Include="Tags\Owner.cs" />
+    <Compile Include="Tags\PartOfSet.cs" />
+    <Compile Include="Tags\Private.cs" />
+    <Compile Include="Tags\Publisher.cs" />
+    <Compile Include="Tags\Subtitle.cs" />
     <Compile Include="Tags\TextFrame.cs" />
     <Compile Include="Tags\Title.cs" />
     <Compile Include="Tags\TrackNumber.cs" />
-    <None Include="Tags\UniqueFileIdentifier.cs" />
-    <None Include="Tags\UnsynchronizedLyrics.cs" />
-    <None Include="Tags\UserDefinedText.cs" />
+    <Compile Include="Tags\UniqueFileIdentifier.cs" />
+    <Compile Include="Tags\UnsynchronizedLyrics.cs" />
+    <Compile Include="Tags\UserDefinedText.cs" />
     <Compile Include="Tags\Year.cs" />
     <Compile Include="TagVersion.cs">
       <SubType>Code</SubType>
