@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Buffers;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,24 +7,22 @@ namespace StebetTagger.Core.Id3
 {
     public static class StreamExtensions
     {
-        public static string ReadAnsiString(this Stream stream, long limit)
+        public static async Task<string> ReadAnsiString(this Stream stream, long limit)
         {
-            var byteList = new List<byte>();
             long streamStart = stream.Position;
-            while (stream.Position < limit)
+            while (stream.Position < limit && !(stream.ReadByte() == 0x00))
             {
-                var lastByte = stream.ReadByte();
-                if(lastByte != 0x00)
-                {
-                    byteList.Add((byte)lastByte);
-                }
-                else
-                { 
-                    break;
-                }
             }
 
-            return Encoding.Default.GetString(byteList.ToArray());
+            stream.Seek(-1, SeekOrigin.Current);
+            int size = (int)(stream.Position - streamStart);
+            var stringBytes = ArrayPool<byte>.Shared.Rent(size);
+            stream.Seek(streamStart, SeekOrigin.Begin);
+            await stream.ReadAsync(stringBytes, 0, size).ConfigureAwait(false);
+            stream.Seek(1, SeekOrigin.Current);
+            string results = Encoding.Default.GetString(stringBytes, 0, size);
+            ArrayPool<byte>.Shared.Return(stringBytes);
+            return results;
         }
 
         public static async Task<string> ReadUnicodeStringAsync(this Stream stream, long limit)
@@ -37,12 +33,14 @@ namespace StebetTagger.Core.Id3
             {
             }
             stream.Seek(-1, SeekOrigin.Current);
-            var stringBytes = new byte[stream.Position - streamStart];
+            int size = (int)(stream.Position - streamStart);
+            var stringBytes = ArrayPool<byte>.Shared.Rent(size);
             stream.Seek(streamStart, SeekOrigin.Begin);
-            await stream.ReadAsync(stringBytes, 0, stringBytes.Length).ConfigureAwait(false);
-            stream.ReadByte();
-            stream.ReadByte();
-            return encoding.GetString(stringBytes);
+            await stream.ReadAsync(stringBytes, 0, size).ConfigureAwait(false);
+            stream.Seek(2, SeekOrigin.Current);
+            string results = encoding.GetString(stringBytes, 0, size);
+            ArrayPool<byte>.Shared.Return(stringBytes);
+            return results;
         }
     }
 }

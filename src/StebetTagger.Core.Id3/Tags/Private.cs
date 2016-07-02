@@ -22,7 +22,7 @@ namespace StebetTagger.Core.Id3.Tags
                     if (tagLength > 1)
                     {
                         long streamStart = stream.Position;
-                        Description = stream.ReadAnsiString(streamStart + tagLength);
+                        Description = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                         Value = new byte[tagLength - (stream.Position - streamStart)];
                         await stream.ReadAsync(Value, 0, Value.Length).ConfigureAwait(false);
                     }

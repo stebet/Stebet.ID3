@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -63,8 +62,8 @@ namespace StebetTagger.Core.Id3.Tags
                 switch (encoding)
                 {
                     case 0x00:
-                        Description = stream.ReadAnsiString(streamStart + tagLength);
-                        Text = stream.ReadAnsiString(streamStart + tagLength);
+                        Description = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
+                        Text = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                         break;
                     case 0x01:
                         Description = await stream.ReadUnicodeStringAsync(streamStart + tagLength).ConfigureAwait(false);
@@ -74,7 +73,7 @@ namespace StebetTagger.Core.Id3.Tags
                         throw new ArgumentException("Frame has an invalid encoding marker", nameof(stream));
                 }
             }
-        }        
+        }
 
         public UnsynchronizedLyrics()
         {

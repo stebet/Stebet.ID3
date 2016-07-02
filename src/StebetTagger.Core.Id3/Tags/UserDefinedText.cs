@@ -25,8 +25,8 @@ namespace StebetTagger.Core.Id3.Tags
                         int encoding = stream.ReadByte();
                         if (encoding == 0x00)
                         {
-                            Description = stream.ReadAnsiString(streamStart + tagLength);
-                            Value = stream.ReadAnsiString(streamStart + tagLength);
+                            Description = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
+                            Value = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                         }
                         else if (encoding == 0x01)
                         {

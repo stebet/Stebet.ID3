@@ -1,6 +1,6 @@
 using System;
+using System.Buffers;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3
@@ -31,18 +31,16 @@ namespace StebetTagger.Core.Id3
         public static async Task<MP3File> ReadMP3FileAsync(Stream stream)
         {
             var file = new MP3File();
-            var fileHeader = new byte[3];
-            await stream.ReadAsync(fileHeader, 0, fileHeader.Length).ConfigureAwait(false);
-            file.HasId3V2 = fileHeader.SequenceEqual(Constants.ID3Header);
+            file.HasId3V2 = (stream.ReadByte() == Constants.ID3Header[0] && stream.ReadByte() == Constants.ID3Header[1] && stream.ReadByte() == Constants.ID3Header[2]);
             if (file.HasId3V2)
             {
                 // Let's read the tag header.
                 file.OriginalTagHeader = await TagHeader.ReadTagHeader(stream).ConfigureAwait(false);
 
                 // Let's read the tag frames into a byte array and wrap it into a memorystream.
-                var tags = new byte[file.OriginalTagHeader.TagLength];
-                await stream.ReadAsync(tags, 0, tags.Length).ConfigureAwait(false);
-                using (var memoryStream = new MemoryStream(tags))
+                var tags = ArrayPool<byte>.Shared.Rent(file.OriginalTagHeader.TagLength);
+                await stream.ReadAsync(tags, 0, file.OriginalTagHeader.TagLength).ConfigureAwait(false);
+                using (var memoryStream = new MemoryStream(tags, 0, file.OriginalTagHeader.TagLength))
                 {
                     // Let's read the tag.
                     switch (file.OriginalTagHeader.Version)
@@ -59,6 +57,7 @@ namespace StebetTagger.Core.Id3
                             break;
                     }
                 }
+                ArrayPool<byte>.Shared.Return(tags);
             }
             else // No ID3v2 Tag so the Mpeg Frames presumably start at the beginning but let's make sure though
             {
@@ -149,7 +148,7 @@ namespace StebetTagger.Core.Id3
                     {
                         file.Seek(MpegStart, SeekOrigin.Begin);
                         var buffer = new byte[4096];
-                        while(file.Position < MpegEnd)
+                        while (file.Position < MpegEnd)
                         {
                             int bytesRead = await file.ReadAsync(buffer, 0, (int)Math.Min(MpegEnd - file.Position, buffer.Length)).ConfigureAwait(false);
                             await memoryStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);

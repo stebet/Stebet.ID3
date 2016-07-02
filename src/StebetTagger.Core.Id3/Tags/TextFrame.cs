@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3.Tags
@@ -57,7 +58,7 @@ namespace StebetTagger.Core.Id3.Tags
                     {
                         long startPosition = stream.Position;
                         long textSize = 0;
-                        int peek = stream.ReadByte(); 
+                        int peek = stream.ReadByte();
                         if (peek == 0x00)
                         {
                             Encoding = Encoding.GetEncoding("ISO-8859-1");
@@ -71,9 +72,10 @@ namespace StebetTagger.Core.Id3.Tags
 
                             if (textSize > 0)
                             {
-                                byte[] textBytes = new byte[textSize];
+                                var textBytes = ArrayPool<byte>.Shared.Rent((int)textSize);
                                 await stream.ReadAsync(textBytes, 0, textBytes.Length).ConfigureAwait(false);
                                 Text = Encoding.GetString(textBytes);
+                                ArrayPool<byte>.Shared.Return(textBytes);
                             }
                         }
                         else if (peek == 0x01)
@@ -97,9 +99,10 @@ namespace StebetTagger.Core.Id3.Tags
                                     Encoding = Encoding.BigEndianUnicode;
                                 }
 
-                                byte[] textBytes = new byte[textSize];
+                                var textBytes = ArrayPool<byte>.Shared.Rent((int)textSize);
                                 await stream.ReadAsync(textBytes, 0, textBytes.Length).ConfigureAwait(false);
                                 Text = Encoding.GetString(textBytes);
+                                ArrayPool<byte>.Shared.Return(textBytes);
                             }
                         }
                         else

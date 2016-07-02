@@ -1,7 +1,6 @@
-using System;
+using System.Buffers;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace StebetTagger.Core.Id3
 {
@@ -18,15 +17,15 @@ namespace StebetTagger.Core.Id3
         public bool Compression { get; private set; }
         public bool Encryption { get; private set; }
         public bool GroupingIdentity { get; private set; }
-        
+
         private Frame23Header()
         {
         }
 
         public static Frame23Header FromStream(Stream stream)
         {
-            var frameHeader = new byte[10];
-            stream.Read(frameHeader, 0, frameHeader.Length);
+            var frameHeader = ArrayPool<byte>.Shared.Rent(10);
+            stream.Read(frameHeader, 0, 10);
             var header = new Frame23Header();
 
             header.Id = Encoding.Default.GetString(frameHeader, 0, 4);
@@ -37,6 +36,8 @@ namespace StebetTagger.Core.Id3
             header.Compression = ((frameHeader[9] & 0x80) == 0x80);
             header.Encryption = ((frameHeader[9] & 0x40) == 0x40);
             header.GroupingIdentity = ((frameHeader[9] & 0x20) == 0x20);
+
+            ArrayPool<byte>.Shared.Return(frameHeader);
 
             return header;
         }

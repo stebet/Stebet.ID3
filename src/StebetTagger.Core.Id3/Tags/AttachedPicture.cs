@@ -64,16 +64,16 @@ namespace StebetTagger.Core.Id3.Tags
                 case TagVersion.V23:
                     if (encoding == 0x00)
                     {
-                        MimeType = stream.ReadAnsiString(streamStart + tagLength);
+                        MimeType = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                         PictureType = (AttachedPictureType)stream.ReadByte();
 
-                        Description = stream.ReadAnsiString(streamStart + tagLength);
+                        Description = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                         Data = new byte[tagLength - (stream.Position - streamStart)];
                         await stream.ReadAsync(Data, 0, Data.Length).ConfigureAwait(false);
                     }
                     else if (encoding == 0x01)
                     {
-                        MimeType = stream.ReadAnsiString(streamStart + tagLength);
+                        MimeType = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                         PictureType = (AttachedPictureType)stream.ReadByte();
                         Description = await stream.ReadUnicodeStringAsync(streamStart + tagLength).ConfigureAwait(false);
                         Data = new byte[tagLength - (stream.Position - streamStart)];

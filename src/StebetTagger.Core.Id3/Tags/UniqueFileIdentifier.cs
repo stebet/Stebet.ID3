@@ -38,7 +38,7 @@ namespace StebetTagger.Core.Id3.Tags
             if (tagLength > 3)
             {
                 long streamStart = stream.Position;
-                OwnerIdentifier = stream.ReadAnsiString(streamStart + tagLength);
+                OwnerIdentifier = await stream.ReadAnsiString(streamStart + tagLength).ConfigureAwait(false);
                 Identifier = new byte[tagLength - (stream.Position - streamStart)];
                 await stream.ReadAsync(Identifier, 0, Identifier.Length).ConfigureAwait(false);
             }

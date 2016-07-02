@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -20,8 +21,8 @@ namespace StebetTagger.Core.Id3
         internal static async Task<TagHeader> ReadTagHeader(Stream stream)
         {
             var header = new TagHeader();
-            byte[] headerBytes = new byte[7];
-            await stream.ReadAsync(headerBytes, 0, headerBytes.Length).ConfigureAwait(false);
+            byte[] headerBytes = ArrayPool<byte>.Shared.Rent(7);
+            await stream.ReadAsync(headerBytes, 0, 7).ConfigureAwait(false);
 
             switch (Convert.ToInt32(headerBytes[0]))
             {
@@ -44,7 +45,7 @@ namespace StebetTagger.Core.Id3
             header.Experimental = ((headerBytes[2] & 0x20) == 0x20);
             header.HasFooter = ((headerBytes[2] & 0x10) == 0x10);
             header.TagLength = headerBytes[3] * 128 * 128 * 128 + headerBytes[4] * 128 * 128 + headerBytes[5] * 128 + headerBytes[6];
-
+            ArrayPool<byte>.Shared.Return(headerBytes);
             return header;
         }
     }
