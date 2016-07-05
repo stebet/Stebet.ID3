@@ -33,7 +33,7 @@ namespace StebetTagger.Core.Id3.Tags
 
         internal override string GetTagId(TagVersion version) => "UFID";
 
-        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, uint tagLength, TagVersion version)
         {
             if (tagLength > 3)
             {

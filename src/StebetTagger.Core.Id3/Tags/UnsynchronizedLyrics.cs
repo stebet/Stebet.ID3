@@ -50,7 +50,7 @@ namespace StebetTagger.Core.Id3.Tags
             }
         }
 
-        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, uint tagLength, TagVersion version)
         {
             if (tagLength > 6)
             {

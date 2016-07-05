@@ -1,7 +1,8 @@
+using StebetTagger.Core.Id3.Tags;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
-using StebetTagger.Core.Id3.Tags;
 
 namespace StebetTagger.Core.Id3
 {
@@ -10,6 +11,31 @@ namespace StebetTagger.Core.Id3
     /// </summary>
     public static class Tag23Factory
     {
+        private static readonly uint TALB = Encoding.ASCII.GetBytes("TALB").ReadUInt32(0);
+        private static readonly uint TPE1 = Encoding.ASCII.GetBytes("TPE1").ReadUInt32(0);
+        private static readonly uint TPE2 = Encoding.ASCII.GetBytes("TPE2").ReadUInt32(0);
+        private static readonly uint TPE3 = Encoding.ASCII.GetBytes("TPE3").ReadUInt32(0);
+        private static readonly uint TCOM = Encoding.ASCII.GetBytes("TCOM").ReadUInt32(0);
+        private static readonly uint TCON = Encoding.ASCII.GetBytes("TCON").ReadUInt32(0);
+        private static readonly uint TIT2 = Encoding.ASCII.GetBytes("TIT2").ReadUInt32(0);
+        private static readonly uint TRCK = Encoding.ASCII.GetBytes("TRCK").ReadUInt32(0);
+        private static readonly uint TYER = Encoding.ASCII.GetBytes("TYER").ReadUInt32(0);
+        private static readonly uint APIC = Encoding.ASCII.GetBytes("APIC").ReadUInt32(0);
+        private static readonly uint USLT = Encoding.ASCII.GetBytes("USLT").ReadUInt32(0);
+        private static readonly uint TXXX = Encoding.ASCII.GetBytes("TXXX").ReadUInt32(0);
+        private static readonly uint TIT3 = Encoding.ASCII.GetBytes("TIT3").ReadUInt32(0);
+        private static readonly uint TENC = Encoding.ASCII.GetBytes("TENC").ReadUInt32(0);
+        private static readonly uint TORY = Encoding.ASCII.GetBytes("TORY").ReadUInt32(0);
+        private static readonly uint TPUB = Encoding.ASCII.GetBytes("TPUB").ReadUInt32(0);
+        private static readonly uint TPOS = Encoding.ASCII.GetBytes("TPOS").ReadUInt32(0);
+        private static readonly uint TOWN = Encoding.ASCII.GetBytes("TOWN").ReadUInt32(0);
+        private static readonly uint PRIV = Encoding.ASCII.GetBytes("PRIV").ReadUInt32(0);
+        private static readonly uint TOFN = Encoding.ASCII.GetBytes("TOFN").ReadUInt32(0);
+        private static readonly uint TSRC = Encoding.ASCII.GetBytes("TSRC").ReadUInt32(0);
+        private static readonly uint TCOP = Encoding.ASCII.GetBytes("TCOP").ReadUInt32(0);
+        private static readonly uint TDAT = Encoding.ASCII.GetBytes("TDAT").ReadUInt32(0);
+        private static readonly uint TMED = Encoding.ASCII.GetBytes("TMED").ReadUInt32(0);
+        private static readonly uint UFID = Encoding.ASCII.GetBytes("UFID").ReadUInt32(0);
         public static async Task<Tag> FromStream(Stream stream, int tagLength)
         {
             var newTag = new Tag();
@@ -34,62 +60,58 @@ namespace StebetTagger.Core.Id3
             return newTag;
         }
 
-        public static Frame GetFrame(string frameId)
+        public static Frame GetFrame(uint frameId)
         {
-            switch(frameId)
-            {
-                case "TALB":
-                    return new Album();
-                case "TPE1":
-                    return new Artist();
-                case "TPE2":
-                case "TPE3":
-                    return new AlbumArtist();
-                case "TCOM":
-                    return new Composer();
-                case "TCON":
-                    return new ContentType();
-                case "TIT2":
-                    return new Title();
-                case "TRCK":
-                    return new TrackNumber();
-                case "TYER":
-                    return new Year();
-                case "APIC":
-                    return new AttachedPicture();
-                case "USLT":
-                    return new UnsynchronizedLyrics();
-                case "TXXX":
-                    return new UserDefinedText();
-                case "TIT3":
-                    return new Subtitle();
-                case "TENC":
-                    return new EncodedBy();
-                case "TORY":
-                    return new OriginalYear();
-                case "TPUB":
-                    return new Publisher();
-                case "TPOS":
-                    return new PartOfSet();
-                case "TOWN":
-                    return new Owner();
-                case "PRIV":
-                    return new Private();
-                case "TOFN":
-                    return new OriginalFilename();
-                case "TSRC":
-                    return new InternationalStandardRecordingCode();
-                case "TCOP":
-                    return new Copyright();
-                case "TDAT":
-                    return new Date();
-                case "TMED":
-                    return new MediaType();
-                case "UFID":
-                    return new UniqueFileIdentifier();
-                default:
-                    return null;
-            }
+            if (frameId == TALB)
+                return new Album();
+            if (frameId == TPE1)
+                return new Artist();
+            if (frameId == TPE2 || frameId == TPE3)
+                return new AlbumArtist();
+            if (frameId == TCOM)
+                return new Composer();
+            if (frameId == TCON)
+                return new ContentType();
+            if (frameId == TIT2)
+                return new Title();
+            if (frameId == TRCK)
+                return new TrackNumber();
+            if (frameId == TYER)
+                return new Year();
+            if (frameId == APIC)
+                return new AttachedPicture();
+            if (frameId == USLT)
+                return new UnsynchronizedLyrics();
+            if (frameId == TXXX)
+                return new UserDefinedText();
+            if (frameId == TIT3)
+                return new Subtitle();
+            if (frameId == TENC)
+                return new EncodedBy();
+            if (frameId == TORY)
+                return new OriginalYear();
+            if (frameId == TPUB)
+                return new Publisher();
+            if (frameId == TPOS)
+                return new PartOfSet();
+            if (frameId == TOWN)
+                return new Owner();
+            if (frameId == PRIV)
+                return new Private();
+            if (frameId == TOFN)
+                return new OriginalFilename();
+            if (frameId == TSRC)
+                return new InternationalStandardRecordingCode();
+            if (frameId == TCOP)
+                return new Copyright();
+            if (frameId == TDAT)
+                return new Date();
+            if (frameId == TMED)
+                return new MediaType();
+            if (frameId == UFID)
+                return new UniqueFileIdentifier();
+
+            return null;
         }
     }
 }

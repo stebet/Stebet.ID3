@@ -53,6 +53,6 @@ namespace StebetTagger.Core.Id3
         /// <returns>A string corresponding to the Frame ID</returns>
         internal abstract string GetTagId(TagVersion version);
 
-        public abstract Task FromStreamAsync(Stream stream, int tagLength, TagVersion version);
+        public abstract Task FromStreamAsync(Stream stream, uint tagLength, TagVersion version);
     }
 }

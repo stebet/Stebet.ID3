@@ -14,7 +14,7 @@ namespace StebetTagger.Core.Id3.Tags
         public string Description { get; set; }
         public byte[] Value { get; set; }
 
-        public override async Task FromStreamAsync(Stream stream, int tagLength, TagVersion version)
+        public override async Task FromStreamAsync(Stream stream, uint tagLength, TagVersion version)
         {
             switch (version)
             {
