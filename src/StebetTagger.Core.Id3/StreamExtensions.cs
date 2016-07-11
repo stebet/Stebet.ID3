@@ -11,32 +11,38 @@ namespace StebetTagger.Core.Id3
         {
             var stringBytes = ArrayPool<byte>.Shared.Rent((int)(limit - stream.Position));
             int len = 0;
-            while (stream.Position < limit)
+            bool eof = false;
+
+            while (stream.Position <= limit)
             {
                 stringBytes[len++] = (byte)stream.ReadByte();
                 if (stringBytes[len - 1] == 0x00)
                     break;
             }
 
-            string results = Encoding.Default.GetString(stringBytes, 0, len - (stream.Position == limit ? 0 : 1));
+            string results = Encoding.Default.GetString(stringBytes, 0, len - (stream.Position == (limit + 1) ? 0 : 1));
             ArrayPool<byte>.Shared.Return(stringBytes);
             return results;
         }
 
         public static async Task<string> ReadUnicodeStringAsync(this Stream stream, long limit)
         {
-            var encoding = (stream.ReadByte() == 0xFF && stream.ReadByte() == 0xFE) ? Encoding.Unicode : Encoding.BigEndianUnicode;
+            byte a = (byte)stream.ReadByte();
+            byte b = (byte)stream.ReadByte();
 
+            var encoding = (a == 0xFF && b == 0xFE) ? Encoding.Unicode : Encoding.BigEndianUnicode;
             var stringBytes = ArrayPool<byte>.Shared.Rent((int)(limit - stream.Position));
+
             int len = 0;
-            do
+            while (stream.Position <= limit)
             {
                 stringBytes[len++] = (byte)stream.ReadByte();
                 stringBytes[len++] = (byte)stream.ReadByte();
+                if (stringBytes[len - 1] == 0x00 && stringBytes[len - 2] == 0x00)
+                    break;
             }
-            while (stringBytes[len - 1] != 0x00 && stringBytes[len - 2] != 0x00);
 
-            string results = encoding.GetString(stringBytes, 0, len - 2);
+            string results = encoding.GetString(stringBytes, 0, len - (stream.Position == (limit + 1) ? 0 : 2));
             ArrayPool<byte>.Shared.Return(stringBytes);
             return results;
         }
