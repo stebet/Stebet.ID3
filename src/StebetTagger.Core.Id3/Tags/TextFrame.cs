@@ -57,53 +57,14 @@ namespace StebetTagger.Core.Id3.Tags
                     if (tagLength > 1)
                     {
                         long startPosition = stream.Position;
-                        long textSize = 0;
                         int peek = stream.ReadByte();
                         if (peek == 0x00)
                         {
-                            Encoding = Encoding.GetEncoding("ISO-8859-1");
-                            while (stream.ReadByte() != 0x00 && (stream.Position - startPosition) < tagLength)
-                            {
-                            }
-
-                            textSize = (stream.Position) - (startPosition + 1);
-
-                            stream.Seek(startPosition + 1, SeekOrigin.Begin);
-
-                            if (textSize > 0)
-                            {
-                                var textBytes = ArrayPool<byte>.Shared.Rent((int)textSize);
-                                await stream.ReadAsync(textBytes, 0, textBytes.Length).ConfigureAwait(false);
-                                Text = Encoding.GetString(textBytes);
-                                ArrayPool<byte>.Shared.Return(textBytes);
-                            }
+                            Text = await stream.ReadAnsiString(startPosition + tagLength).ConfigureAwait(false);
                         }
                         else if (peek == 0x01)
                         {
-                            int nextPeek = stream.ReadByte();
-                            while (textSize < tagLength && (peek == 0x00 && nextPeek == 0x00) == false)
-                            {
-                                textSize += 2;
-                            }
-
-                            stream.Seek(-(stream.Position - startPosition), SeekOrigin.Current);
-
-                            if (textSize > 0)
-                            {
-                                if (stream.ReadByte() == 0xFF && stream.ReadByte() == 0xFE)
-                                {
-                                    Encoding = Encoding.Unicode;
-                                }
-                                else
-                                {
-                                    Encoding = Encoding.BigEndianUnicode;
-                                }
-
-                                var textBytes = ArrayPool<byte>.Shared.Rent((int)textSize);
-                                await stream.ReadAsync(textBytes, 0, textBytes.Length).ConfigureAwait(false);
-                                Text = Encoding.GetString(textBytes);
-                                ArrayPool<byte>.Shared.Return(textBytes);
-                            }
+                            Text = await stream.ReadUnicodeStringAsync(startPosition + tagLength).ConfigureAwait(false);
                         }
                         else
                         {

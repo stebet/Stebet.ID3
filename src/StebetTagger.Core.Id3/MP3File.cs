@@ -38,17 +38,17 @@ namespace StebetTagger.Core.Id3
                 file.OriginalTagHeader = await TagHeader.ReadTagHeader(stream).ConfigureAwait(false);
 
                 // Let's read the tag frames into a byte array and wrap it into a memorystream.
-                //var tags = ArrayPool<byte>.Shared.Rent(file.OriginalTagHeader.TagLength);
-                //await stream.ReadAsync(tags, 0, file.OriginalTagHeader.TagLength).ConfigureAwait(false);
-                //using (var memoryStream = new MemoryStream(tags, 0, file.OriginalTagHeader.TagLength))
-                //{
+                var tags = ArrayPool<byte>.Shared.Rent(file.OriginalTagHeader.TagLength);
+                await stream.ReadAsync(tags, 0, file.OriginalTagHeader.TagLength).ConfigureAwait(false);
+                using (var memoryStream = new MemoryStream(tags, 0, file.OriginalTagHeader.TagLength))
+                {
                     // Let's read the tag.
                     switch (file.OriginalTagHeader.Version)
                     {
                         case TagVersion.V22:
                             break;
                         case TagVersion.V23:
-                            file.Tag = await Tag23Factory.FromStream(stream, file.OriginalTagHeader.TagLength).ConfigureAwait(false);
+                            file.Tag = await Tag23Factory.FromStream(memoryStream, file.OriginalTagHeader.TagLength).ConfigureAwait(false);
                             break;
                         case TagVersion.V24:
                             //Tag = Tag24Factory.FromBytes(tagBytes);
@@ -56,8 +56,8 @@ namespace StebetTagger.Core.Id3
                         case TagVersion.Unknown:
                             break;
                     }
-                //}
-                //ArrayPool<byte>.Shared.Return(tags);
+                }
+                ArrayPool<byte>.Shared.Return(tags);
             }
             else // No ID3v2 Tag so the Mpeg Frames presumably start at the beginning but let's make sure though
             {

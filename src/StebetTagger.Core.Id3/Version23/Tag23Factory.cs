@@ -36,6 +36,7 @@ namespace StebetTagger.Core.Id3
         private static readonly uint TDAT = Encoding.ASCII.GetBytes("TDAT").ReadUInt32(0);
         private static readonly uint TMED = Encoding.ASCII.GetBytes("TMED").ReadUInt32(0);
         private static readonly uint UFID = Encoding.ASCII.GetBytes("UFID").ReadUInt32(0);
+
         public static async Task<Tag> FromStream(Stream stream, int tagLength)
         {
             var newTag = new Tag();

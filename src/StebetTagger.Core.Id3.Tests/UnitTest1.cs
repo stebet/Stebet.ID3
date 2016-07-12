@@ -9,7 +9,7 @@ namespace StebetTagger.Core.Id3.Tests
     [TestClass]
     public class StreamExtensionTests
     {
-        private readonly string Test = "Test";
+        private readonly string Test = "AwesomeTestString";
 
         [TestMethod]
         public async Task ReadAnsiStringAndReachEndOfStream()
