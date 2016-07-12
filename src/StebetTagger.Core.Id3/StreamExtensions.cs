@@ -11,16 +11,19 @@ namespace StebetTagger.Core.Id3
         {
             var stringBytes = ArrayPool<byte>.Shared.Rent((int)(limit - stream.Position));
             int len = 0;
-            bool eof = false;
 
-            while (stream.Position <= limit)
+            while (stream.Position < limit)
             {
-                stringBytes[len++] = (byte)stream.ReadByte();
-                if (stringBytes[len - 1] == 0x00)
+                stringBytes[len] = (byte)stream.ReadByte();
+                if (stringBytes[len] == 0x00)
+                {
                     break;
+                }
+
+                len++;
             }
 
-            string results = Encoding.Default.GetString(stringBytes, 0, len - (stream.Position == (limit + 1) ? 0 : 1));
+            string results = Encoding.Default.GetString(stringBytes, 0, len);
             ArrayPool<byte>.Shared.Return(stringBytes);
             return results;
         }
@@ -34,15 +37,19 @@ namespace StebetTagger.Core.Id3
             var stringBytes = ArrayPool<byte>.Shared.Rent((int)(limit - stream.Position));
 
             int len = 0;
-            while (stream.Position <= limit)
+            while (stream.Position < limit)
             {
-                stringBytes[len++] = (byte)stream.ReadByte();
-                stringBytes[len++] = (byte)stream.ReadByte();
-                if (stringBytes[len - 1] == 0x00 && stringBytes[len - 2] == 0x00)
+                stringBytes[len] = (byte)stream.ReadByte();
+                stringBytes[len + 1] = (byte)stream.ReadByte();
+                if (stringBytes[len + 1] == 0x00 && stringBytes[len] == 0x00)
+                {
                     break;
+                }
+
+                len += 2;
             }
 
-            string results = encoding.GetString(stringBytes, 0, len - (stream.Position == (limit + 1) ? 0 : 2));
+            string results = encoding.GetString(stringBytes, 0, len);
             ArrayPool<byte>.Shared.Return(stringBytes);
             return results;
         }

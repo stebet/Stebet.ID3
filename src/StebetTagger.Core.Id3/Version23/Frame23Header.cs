@@ -41,9 +41,4 @@ namespace StebetTagger.Core.Id3
             return header;
         }
     }
-
-    public enum KnownIds
-    {
-        TALB = 0x54414C42
-    }
 }

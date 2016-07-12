@@ -16,7 +16,7 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.ASCII.GetBytes(Test);
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -24,7 +24,7 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.ASCII.GetBytes(Test + "\0\0\0");
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -32,8 +32,8 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.ASCII.GetBytes(Test + "\0" + Test);
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength - 1));
-            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength));
+            Assert.AreEqual(Test, await memoryStream.ReadAnsiString(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -41,7 +41,7 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.Unicode.GetPreamble().Concat(Encoding.Unicode.GetBytes(Test)).ToArray();
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.Unicode.GetPreamble().Concat(Encoding.Unicode.GetBytes(Test + "\0Garbage")).ToArray();
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -57,8 +57,8 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.Unicode.GetPreamble().Concat(Encoding.Unicode.GetBytes(Test + "\0")).Concat(Encoding.Unicode.GetPreamble()).Concat(Encoding.Unicode.GetBytes(Test)).ToArray();
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.BigEndianUnicode.GetPreamble().Concat(Encoding.BigEndianUnicode.GetBytes(Test)).ToArray();
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.BigEndianUnicode.GetPreamble().Concat(Encoding.BigEndianUnicode.GetBytes(Test + "\0Garbage")).ToArray();
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
         }
 
         [TestMethod]
@@ -82,8 +82,8 @@ namespace StebetTagger.Core.Id3.Tests
         {
             byte[] ansiBytes = Encoding.BigEndianUnicode.GetPreamble().Concat(Encoding.BigEndianUnicode.GetBytes(Test + "\0")).Concat(Encoding.BigEndianUnicode.GetPreamble()).Concat(Encoding.BigEndianUnicode.GetBytes(Test)).ToArray();
             var memoryStream = new MemoryStream(ansiBytes);
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
-            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength - 1));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
+            Assert.AreEqual(Test, await memoryStream.ReadUnicodeStringAsync(ansiBytes.LongLength));
         }
     }
 }
